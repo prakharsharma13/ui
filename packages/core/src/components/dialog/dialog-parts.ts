@@ -151,7 +151,11 @@ function dialogSlots(
           el.style.setProperty("--dialog-stack", String(store.get().stack))
         stack()
         const offStack = store.subscribe(stack)
-        if (dev && el.parentElement?.closest("form")) {
+        if (
+          dev &&
+          el.querySelector("form") &&
+          el.parentElement?.closest("form")
+        ) {
           warn(
             "The content renders inside a form, which nests forms. Pass `container` to render it elsewhere.",
             { component: name, id }

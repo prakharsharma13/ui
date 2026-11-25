@@ -1,8 +1,16 @@
 // @vitest-environment jsdom
 import { afterEach, expect, test, vi } from "vitest"
 import { command } from "../src/components/command/command"
+import { dialog } from "../src/components/dialog/dialog"
+import { drawer } from "../src/components/drawer/drawer"
 import { popover } from "../src/components/popover/popover"
 import { mount } from "../src/testing"
+
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as never
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -35,15 +43,25 @@ test("Enter in a command search with nothing highlighted submits no form", async
 })
 
 test.each([
-  ["holding a form, warns", "<form><input /></form>", true],
-  ["holding only fields, stays quiet", "<input />", false],
-])("a popover rendered inside a form, %s", (_, inner, warned) => {
+  ["popover", popover],
+  ["dialog", dialog],
+  ["drawer", drawer],
+])("a %s rendered inside a form", (_, primitive) => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-  const view = mount(
-    popover,
+  const withForm = mount(
+    primitive,
     { defaultOpen: true },
-    `<form><trigger>Filter</trigger><content>${inner}</content></form>`
+    `<form><trigger>Open</trigger><content><title>Title</title><form><input /></form></content></form>`
   )
-  expect(nests(warn)).toBe(warned)
-  view.unmount()
+  expect(nests(warn)).toBe(true)
+  withForm.unmount()
+  warn.mockClear()
+
+  const withFields = mount(
+    primitive,
+    { defaultOpen: true },
+    `<form><trigger>Open</trigger><content><title>Title</title><input /></content></form>`
+  )
+  expect(nests(warn)).toBe(false)
+  withFields.unmount()
 })

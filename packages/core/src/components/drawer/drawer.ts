@@ -515,7 +515,11 @@ const drawerPrimitive = /* @__PURE__ */ definePrimitive({
         },
         bind(el, { api, id, store }) {
           settleFlag(store, "titled")
-          if (dev && el.parentElement?.closest("form")) {
+          if (
+            dev &&
+            el.querySelector("form") &&
+            el.parentElement?.closest("form")
+          ) {
             warn(
               "The content renders inside a form, which nests forms. Pass `container` to render it elsewhere.",
               {
